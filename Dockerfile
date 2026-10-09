@@ -12,7 +12,7 @@ RUN { echo 'upload_max_filesize=12M'; echo 'post_max_size=60M'; echo 'max_file_u
       echo 'date.timezone=America/Argentina/San_Juan'; echo 'expose_php=Off'; } > /usr/local/etc/php/conf.d/app.ini
 
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
-RUN a2enmod headers rewrite
+RUN a2dismod -f mpm_event mpm_worker || true && a2enmod mpm_prefork headers rewrite
 
 WORKDIR /var/www/app
 COPY . /var/www/app
