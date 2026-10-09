@@ -61,7 +61,7 @@ const $ = id => document.getElementById(id);
 let META, RAW = [], FILTERED = [];
 const SJ = L.latLngBounds([[-32.3, -69.9], [-29.0, -66.5]]);
 const map = L.map('map'); map.fitBounds(SJ);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
 const layer = L.layerGroup().addTo(map);
 const LTI = ['CON_BAJA', 'INCAPACIDAD_PERMANENTE', 'FATAL'];
 
