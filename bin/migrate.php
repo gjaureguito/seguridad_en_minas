@@ -38,6 +38,16 @@ try {
         $st->execute([':e' => strtolower($email), ':n' => getenv('ADMIN_NAME') ?: 'Administrador', ':h' => password_hash($pass, PASSWORD_DEFAULT)]);
         echo "Usuario administrador creado: {$email}\n";
     }
+
+    // Recuperación: si ADMIN_RESET_PASSWORD está definida, reemplaza la clave de ADMIN_EMAIL
+    // y lo reactiva como ADMIN. Borrar la variable después de ingresar.
+    $reset = getenv('ADMIN_RESET_PASSWORD') ?: '';
+    $email = strtolower(getenv('ADMIN_EMAIL') ?: '');
+    if ($reset !== '' && $email !== '') {
+        $st = $pdo->prepare("UPDATE users SET password_hash = :h, active = TRUE, role = 'ADMIN' WHERE email = :e");
+        $st->execute([':h' => password_hash($reset, PASSWORD_DEFAULT), ':e' => $email]);
+        echo $st->rowCount() ? "Contraseña de {$email} restablecida desde ADMIN_RESET_PASSWORD\n" : "ADMIN_RESET_PASSWORD: no existe {$email}\n";
+    }
 } finally {
     $pdo->exec('SELECT pg_advisory_unlock(424242)');
 }
