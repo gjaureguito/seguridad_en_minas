@@ -43,5 +43,6 @@ page_head('Ingresar');
     <div class="mb-3"><label class="form-label">Contraseña</label><input name="password" type="password" class="form-control" required autocomplete="current-password"></div>
     <button class="btn btn-primary w-100">Ingresar</button>
   </form>
+  <?php if (getenv('DEMO_DATA') === '1'): ?><div class="text-center small-muted">Entorno de demostración con datos ficticios.</div><?php endif; ?>
 </div>
 </body></html>

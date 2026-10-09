@@ -38,6 +38,10 @@ function page_nav(array $user, string $active): void {
     echo '</ul><span class="navbar-text small me-3">' . h($user['full_name']) . ' · <span class="badge text-bg-light border">' . h($user['role']) . '</span></span>';
     echo '<a class="btn btn-outline-secondary btn-sm" href="logout.php"><i class="bi bi-box-arrow-right"></i> Salir</a>';
     echo '</div></div></nav>';
+    if (getenv('DEMO_DATA') === '1') {
+        echo '<div class="text-center small py-1" style="background:#fef3c7;color:#78350f;border-bottom:1px solid #fde68a">'
+           . '<i class="bi bi-info-circle"></i> Entorno de demostración: todos los datos (empresas, faenas, personas y hechos) son <b>ficticios</b>.</div>';
+    }
 }
 
 function page_scripts(): void {

@@ -48,6 +48,16 @@ try {
         $st->execute([':h' => password_hash($reset, PASSWORD_DEFAULT), ':e' => $email]);
         echo $st->rowCount() ? "Contraseña de {$email} restablecida desde ADMIN_RESET_PASSWORD\n" : "ADMIN_RESET_PASSWORD: no existe {$email}\n";
     }
+
+    // Datos ficticios de demostración (solo si DEMO_DATA=1 y la base no tiene incidentes)
+    if (getenv('DEMO_DATA') === '1' && (int)$pdo->query('SELECT count(*) FROM incidents')->fetchColumn() === 0) {
+        require __DIR__ . '/demo_seed.php';
+        try { demo_seed($pdo); }
+        catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            fwrite(STDERR, "No se pudieron cargar los datos de demostración: {$e->getMessage()}\n");
+        }
+    }
 } finally {
     $pdo->exec('SELECT pg_advisory_unlock(424242)');
 }
