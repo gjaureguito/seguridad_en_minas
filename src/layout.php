@@ -46,5 +46,5 @@ function page_nav(array $user, string $active): void {
 
 function page_scripts(): void {
     echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>';
-    echo '<script src="assets/common.js?v=2"></script>';
+    echo '<script src="assets/common.js?v=3"></script>';
 }

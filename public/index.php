@@ -226,7 +226,7 @@ let matrixSel = { p: null, c: null };
 /* ---------------- Mapa ---------------- */
 const SJ_BOUNDS = L.latLngBounds([[-32.3, -69.9], [-29.0, -66.5]]);
 const map = L.map('map');
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+addBaseLayers(map);
 map.fitBounds(SJ_BOUNDS, { padding: [20, 20] });
 const cluster = L.markerClusterGroup({ maxClusterRadius: 50, showCoverageOnHover: false, disableClusteringAtZoom: 17 }).addTo(map);
 
@@ -433,12 +433,13 @@ async function reloadIncidents(fit = true) {
       ${it.company ? '<div class="small mt-1"><b>Empresa:</b> ' + esc(it.company) + '</div>' : ''}
       <div class="small mt-1">Estado: <b>${esc(META.enums.estado[it.estado])}</b> · Acciones abiertas: ${it.acciones_abiertas}</div>
       <div class="mt-2 d-flex gap-2"><button class="btn btn-sm btn-primary" data-edit="${it.id}">${READONLY ? 'Ver' : 'Editar'}</button>
-      <a class="btn btn-sm btn-outline-secondary" target="_blank" href="informe.php?id=${it.id}">Informe</a></div></div>`);
+      <a class="btn btn-sm btn-outline-secondary" target="_blank" href="informe.php?id=${it.id}">Informe</a>
+      <a class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener" href="${earthUrl(it.lat, it.lng)}" title="Ver en Google Earth"><i class="bi bi-globe-americas"></i></a></div></div>`);
     m.on('popupopen', ev => { ev.popup.getElement().querySelector('[data-edit]').onclick = () => { loadForEdit(it.id); ev.popup.remove(); }; });
     m.addTo(cluster);
   });
   $('dlFaena').innerHTML = [...faenas].map(f => `<option value="${esc(f)}">`).join('');
-  if (fit && cluster.getLayers().length) map.fitBounds(cluster.getBounds().extend(SJ_BOUNDS), { padding: [20, 20] });
+  if (fit && cluster.getLayers().length) map.fitBounds(cluster.getBounds(), { padding: [30, 30], maxZoom: 15 });
 }
 map.on('zoomend', () => cluster.eachLayer(l => l.options.meta && l.setIcon(iconFor(l.options.meta.category_code, l.options.meta.severity_code))));
 

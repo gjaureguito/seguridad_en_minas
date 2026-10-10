@@ -29,7 +29,8 @@ page_head('Dashboard', ['<link rel="stylesheet" href="https://unpkg.com/leaflet@
         </div>
         <div class="d-flex gap-2 mt-3">
           <button id="btnClear" class="btn btn-outline-secondary btn-sm">Limpiar</button>
-          <button id="btnCSV" class="btn btn-outline-success btn-sm ms-auto"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+          <button id="btnCSV" class="btn btn-outline-success btn-sm ms-auto"><i class="bi bi-filetype-csv"></i> CSV</button>
+          <button id="btnKML" class="btn btn-outline-primary btn-sm" title="Abrir en Google Earth"><i class="bi bi-globe-americas"></i> Google Earth (KML)</button>
         </div>
       </div>
     </div>
@@ -61,7 +62,7 @@ const $ = id => document.getElementById(id);
 let META, RAW = [], FILTERED = [];
 const SJ = L.latLngBounds([[-32.3, -69.9], [-29.0, -66.5]]);
 const map = L.map('map'); map.fitBounds(SJ);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+addBaseLayers(map);
 const layer = L.layerGroup().addTo(map);
 const LTI = ['CON_BAJA', 'INCAPACIDAD_PERMANENTE', 'FATAL'];
 
@@ -103,7 +104,7 @@ function render() {
   layer.clearLayers();
   FILTERED.forEach(it => {
     L.circleMarker([+it.lat, +it.lng], { radius: LTI.includes(it.consecuencia) ? 9 : 6, color: '#111827', weight: 1, fillColor: SEV_COLOR[it.severity_code] || '#ccc', fillOpacity: .9 })
-      .bindPopup(`<b>${esc(it.title)}</b><br><small>${esc(fmtDT(it.event_datetime))}</small><br>${esc(META.enums.consecuencia[it.consecuencia])}<br><a href="index.php#edit=${it.id}">Abrir</a> · <a target="_blank" href="informe.php?id=${it.id}">Informe</a>`)
+      .bindPopup(`<b>${esc(it.title)}</b><br><small>${esc(fmtDT(it.event_datetime))}</small><br>${esc(META.enums.consecuencia[it.consecuencia])}<br><a href="index.php#edit=${it.id}">Abrir</a> · <a target="_blank" href="informe.php?id=${it.id}">Informe</a> · <a target="_blank" rel="noopener" href="${earthUrl(it.lat, it.lng)}">Google Earth</a>`)
       .addTo(layer);
   });
 
@@ -136,6 +137,13 @@ function csv() {
 map.on('moveend', () => { if ($('f_bbox').checked) apply(); });
 $('btnClear').onclick = () => { document.querySelectorAll('input,select').forEach(el => el.type === 'checkbox' ? el.checked = false : el.value = ''); apply(); };
 $('btnCSV').onclick = csv;
+$('btnKML').onclick = () => {
+  if (!FILTERED.length) return toast('No hay registros filtrados para exportar', 'danger');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([toKML(FILTERED, META)], { type: 'application/vnd.google-earth.kml+xml' }));
+  a.download = `incidentes_${new Date().toISOString().slice(0, 10)}.kml`; a.click();
+  toast(`KML con ${FILTERED.length} registros. Abrilo en Google Earth: Proyectos → Abrir → Importar archivo KML.`);
+};
 
 (async () => {
   try {
@@ -149,7 +157,7 @@ $('btnCSV').onclick = csv;
     $('f_ini').value = d.toISOString().slice(0, 10);
     RAW = (await api('incidents.php')).data;
     apply();
-    if (FILTERED.length) map.fitBounds(L.latLngBounds(FILTERED.map(i => [+i.lat, +i.lng])).extend(SJ), { padding: [20, 20] });
+    if (FILTERED.length) map.fitBounds(L.latLngBounds(FILTERED.map(i => [+i.lat, +i.lng])), { padding: [30, 30], maxZoom: 15 });
   } catch (e) { toast(e.message, 'danger'); }
 })();
 </script>

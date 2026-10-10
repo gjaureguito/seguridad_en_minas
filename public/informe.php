@@ -50,7 +50,8 @@ page_head('Informe #' . $id);
   <div class="cardish"><div class="section-title">1. Datos del evento</div>
     <table class="table table-sm mb-0"><tbody>
       <tr><th style="width:28%">Fecha y hora</th><td><?= $fdt($d['event_datetime']) ?> · turno <?= h($d['turno'] ?: '—') ?></td></tr>
-      <tr><th>Lugar</th><td><?= h($d['faena'] ?: '—') ?> / <?= h($d['sector'] ?: '—') ?> · <?= number_format((float)$d['lat'], 6) ?>, <?= number_format((float)$d['lng'], 6) ?></td></tr>
+      <tr><th>Lugar</th><td><?= h($d['faena'] ?: '—') ?> / <?= h($d['sector'] ?: '—') ?> · <?= number_format((float)$d['lat'], 6) ?>, <?= number_format((float)$d['lng'], 6) ?>
+        <a class="no-print ms-2" target="_blank" rel="noopener" href="https://earth.google.com/web/@<?= number_format((float)$d['lat'], 6, '.', '') ?>,<?= number_format((float)$d['lng'], 6, '.', '') ?>,3000a,1200d,35y,0h,60t,0r">Ver en Google Earth</a></td></tr>
       <tr><th>Tipo de contingencia</th><td><?= h(TIPO_CONTINGENCIA[$d['tipo_contingencia']] ?? $d['tipo_contingencia']) ?></td></tr>
       <tr><th>Categoría / severidad real</th><td><?= h($d['categoria']) ?> · <?= h($d['severidad']) ?></td></tr>
       <tr><th>Severidad potencial</th><td><?= $rp ? h($rp['nivel']) . ' (P' . $d['pot_probabilidad'] . ' × C' . $d['pot_consecuencia'] . ' = ' . $rp['valor'] . ')' : '—' ?></td></tr>
