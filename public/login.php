@@ -29,20 +29,31 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 }
 page_head('Ingresar');
 ?>
-<body>
-<div class="container" style="max-width:420px; padding-top:12vh">
-  <div class="text-center mb-4">
-    <div class="fs-2 text-primary"><i class="bi bi-shield-check"></i></div>
-    <h1 class="h4 fw-bold mb-1">Seguridad Minera</h1>
-    <div class="small-muted">Registro y análisis de incidentes en faena</div>
+<body class="login">
+<style>
+  body.login{min-height:100vh;background:var(--pizarra);display:flex;align-items:center;justify-content:center;padding:24px 16px;position:relative}
+  body.login::before{content:"";position:fixed;inset:0 0 auto 0;height:12px;background:repeating-linear-gradient(-45deg,var(--seguridad) 0 18px,#17212B 18px 36px)}
+  .login-box{width:100%;max-width:400px}
+  .login-head{color:#fff;margin-bottom:18px;display:flex;gap:14px;align-items:center}
+  .login-head .brand-mark{width:52px;height:52px;border-radius:10px;background:var(--seguridad);color:var(--pizarra);display:grid;place-items:center;font-size:1.7rem;flex:none}
+  .login-head h1{margin:0;font-size:2rem}
+  .login-head p{margin:0;color:#BFCBCF}
+  .login-box .cardish{padding:22px;border:0}
+  .login-foot{color:#93A3A8;font-size:.82rem;text-align:center;margin-top:14px}
+</style>
+<main class="login-box">
+  <div class="login-head">
+    <span class="brand-mark"><i class="bi bi-shield-fill-check"></i></span>
+    <div><h1>Seguridad Minera</h1><p>Registro e investigación de incidentes en faena</p></div>
   </div>
-  <form method="post" class="cardish p-4">
+  <form method="post" class="cardish">
     <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
     <?php if ($error): ?><div class="alert alert-danger py-2 small"><?= h($error) ?></div><?php endif; ?>
-    <div class="mb-3"><label class="form-label">Email</label><input name="email" type="email" class="form-control" required autofocus autocomplete="username"></div>
-    <div class="mb-3"><label class="form-label">Contraseña</label><input name="password" type="password" class="form-control" required autocomplete="current-password"></div>
-    <button class="btn btn-primary w-100">Ingresar</button>
+    <div class="mb-3"><label class="form-label" for="em">Email</label><input id="em" name="email" type="email" class="form-control" required autofocus autocomplete="username"></div>
+    <div class="mb-3"><label class="form-label" for="pw">Contraseña</label><input id="pw" name="password" type="password" class="form-control" required autocomplete="current-password"></div>
+    <button class="btn btn-primary w-100 py-2">Ingresar</button>
   </form>
-  <?php if (getenv('DEMO_DATA') === '1'): ?><div class="text-center small-muted">Entorno de demostración con datos ficticios.</div><?php endif; ?>
-</div>
+  <?php if (getenv('DEMO_DATA') === '1'): ?><div class="login-foot">Entorno de demostración con datos ficticios.</div><?php endif; ?>
+  <div class="login-foot">Ley 19.587 · Ley 24.557 · Dec. 249/07</div>
+</main>
 </body></html>

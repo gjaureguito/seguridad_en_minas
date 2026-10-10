@@ -23,7 +23,7 @@ page_head('Administración');
           <div class="col-3 d-flex align-items-center"><div class="form-check"><input class="form-check-input" type="checkbox" id="co_activo" checked><label class="form-check-label small" for="co_activo">Activa</label></div></div>
           <div class="col-12 d-flex gap-2"><button class="btn btn-primary btn-sm">Guardar</button><button type="button" class="btn btn-outline-secondary btn-sm" onclick="fCo.reset();co_id.value=''">Nueva</button></div>
         </form>
-        <table class="table table-sm table-hover mb-0"><thead><tr><th>Empresa</th><th>Tipo</th><th>CUIT</th><th>ART</th><th></th></tr></thead><tbody id="tCo"></tbody></table>
+        <table class="table table-sm table-hover mb-0 stack-sm"><thead><tr><th>Empresa</th><th>Tipo</th><th>CUIT</th><th>ART</th><th></th></tr></thead><tbody id="tCo"></tbody></table>
       </div>
     </div>
     <div class="col-12 col-lg-6">
@@ -38,7 +38,7 @@ page_head('Administración');
           <div class="col-2 d-flex align-items-center"><div class="form-check"><input class="form-check-input" type="checkbox" id="u_active" checked><label class="form-check-label small" for="u_active">Activo</label></div></div>
           <div class="col-12 d-flex gap-2"><button class="btn btn-primary btn-sm">Guardar</button><button type="button" class="btn btn-outline-secondary btn-sm" onclick="fU.reset();u_id.value=''">Nuevo</button></div>
         </form>
-        <table class="table table-sm table-hover mb-0"><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th></th></tr></thead><tbody id="tU"></tbody></table>
+        <table class="table table-sm table-hover mb-0 stack-sm"><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th></th></tr></thead><tbody id="tU"></tbody></table>
         <div class="small-muted mt-2">Al editar, dejá la contraseña vacía para no cambiarla.</div>
       </div>
     </div>

@@ -14,18 +14,35 @@ page_head('Cargar incidente', [
 <body>
 <?php page_nav($user, 'index.php'); ?>
 <style>
-  .work{display:flex;height:calc(100vh - 57px)}
-  .panel{width:540px;max-width:100%;overflow:auto;padding:14px;border-right:1px solid var(--ui-border);background:var(--ui-bg)}
-  #map{flex:1;min-height:320px}
-  @media (max-width: 992px){.work{flex-direction:column;height:auto}.panel{width:100%;border-right:0}#map{height:55vh;flex:none}}
-  .nav-tabs .nav-link{font-size:.8rem;padding:.4rem .6rem}
+  html,body{height:100%}
+  body{display:flex;flex-direction:column}
+  .work{display:flex;flex:1;min-height:0}
+  .panel{width:560px;max-width:100%;overflow:auto;padding:16px;border-right:1px solid var(--linea);background:var(--mineral)}
+  .mapwrap{position:relative;flex:1;display:flex;min-height:0}
+  #map{flex:1}
+  .save-bar .d-grid{grid-template-columns:2fr 1fr;display:grid!important}
+  .save-bar{position:sticky;bottom:-16px;margin:0 -16px -16px;padding:12px 16px;background:linear-gradient(to top,var(--mineral) 70%,rgba(238,241,240,0));z-index:5}
+  .coord-box{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .coord-box .val{font-family:'Barlow Condensed';font-weight:700;font-size:1.15rem}
   .photo-tip img{display:block;width:160px;height:110px;object-fit:cover;border-radius:8px}
-  .leaflet-tooltip.photo-tip{background:#fff;border:1px solid var(--ui-border);padding:4px;border-radius:10px}
-  .list-editor li{border:1px solid var(--ui-border);border-radius:10px;padding:6px 8px;margin-bottom:6px;background:#fff;list-style:none}
-  .list-editor{padding-left:0}
-  #legendBox{position:absolute;right:12px;bottom:56px;z-index:1000;background:#fff;border:1px solid var(--ui-border);border-radius:12px;padding:8px 10px;width:250px;max-height:50vh;overflow:auto;display:none;font-size:.78rem}
-  #legendBtn{position:absolute;right:12px;bottom:12px;z-index:1001;width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid var(--ui-border)}
-  .mapwrap{position:relative;flex:1;display:flex}
+  .leaflet-tooltip.photo-tip{background:#fff;border:1px solid var(--linea);padding:4px;border-radius:10px}
+  .list-editor{padding-left:0;margin-bottom:0}
+  .list-editor li{border:1px solid var(--linea);border-radius:var(--radio-sm);padding:8px 10px;margin-bottom:6px;background:#fff;list-style:none}
+  #legendBox{position:absolute;right:12px;bottom:60px;z-index:1000;background:#fff;border:1px solid var(--linea);border-radius:var(--radio);padding:10px 12px;width:250px;max-height:50vh;overflow:auto;display:none;font-size:.82rem}
+  #legendBtn{position:absolute;right:12px;bottom:16px;z-index:1001;width:42px;height:42px;border-radius:var(--radio-sm);background:var(--pizarra);color:#fff;border:0}
+  /* Celular / tablet vertical: mapa arriba, formulario abajo, botón Guardar fijo */
+  @media (max-width: 991.98px){
+    html,body{height:auto}
+    body{display:block}
+    .work{flex-direction:column}
+    .mapwrap{order:-1;height:40vh;min-height:260px;flex:none;border-bottom:3px solid var(--seguridad)}
+    .panel{width:100%;border-right:0;overflow:visible;padding:14px}
+    .save-bar{position:fixed;left:0;right:0;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));margin:0;padding:10px 14px;background:var(--pizarra);z-index:1035}
+    .save-bar .d-grid{grid-template-columns:2fr 1fr;display:grid!important}
+    .save-bar .btn-outline-secondary{color:#fff;border-color:#5C7077}
+    .panel{padding-bottom:90px}
+    #legendBox{bottom:64px}
+  }
 </style>
 
 <div class="work">
@@ -192,10 +209,10 @@ page_head('Cargar incidente', [
       </div>
 
       <?php if (!$readonly): ?>
-      <div class="d-grid gap-2">
+      <div class="save-bar"><div class="d-grid gap-2">
         <button class="btn btn-primary" type="submit" id="btnSave"><i class="bi bi-save"></i> Guardar</button>
-        <button id="btnCancel" class="btn btn-outline-secondary" type="button">Nuevo / cancelar edición</button>
-      </div>
+        <button id="btnCancel" class="btn btn-outline-secondary" type="button"><i class="bi bi-plus-lg"></i> Nuevo</button>
+      </div></div>
       <?php endif; ?>
     </form>
   </div>
@@ -228,6 +245,7 @@ const SJ_BOUNDS = L.latLngBounds([[-32.3, -69.9], [-29.0, -66.5]]);
 const map = L.map('map');
 addBaseLayers(map);
 map.fitBounds(SJ_BOUNDS, { padding: [20, 20] });
+window.addEventListener('resize', () => map.invalidateSize());
 const cluster = L.markerClusterGroup({ maxClusterRadius: 50, showCoverageOnHover: false, disableClusteringAtZoom: 17 }).addTo(map);
 
 function pinSize() { const z = map.getZoom(); return z <= 9 ? 11 : z >= 16 ? 18 : Math.round(11 + (z - 9) * 1); }

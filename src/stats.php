@@ -254,7 +254,34 @@ function compute_stats(PDO $pdo, string $desde, string $hasta, ?int $companyId, 
     $cerradas = ($acc['por_estado']['CUMPLIDA'] ?? 0) + ($acc['por_estado']['VERIFICADA'] ?? 0);
     $acc['pct_cumplimiento'] = $acc['total'] ? round($cerradas * 100 / $acc['total'], 1) : null;
 
+    // ---------- Contador "días sin accidentes con baja" (cartel de faena) ----------
+    $cw = "tipo_contingencia = 'ACCIDENTE_TRABAJO' AND consecuencia IN ('CON_BAJA','INCAPACIDAD_PERMANENTE','FATAL')";
+    $cp = [];
+    if ($companyId) { $cw .= ' AND company_id = :cid'; $cp[':cid'] = $companyId; }
+    $st = $pdo->prepare("SELECT event_datetime::date AS d FROM incidents WHERE $cw ORDER BY event_datetime");
+    $st->execute($cp);
+    $fechas = array_column($st->fetchAll(), 'd');
+    $hoy = new DateTimeImmutable('today');
+    $contador = ['dias' => null, 'ultimo' => null, 'record' => null, 'desde_inicio' => null];
+    $primero = $pdo->query('SELECT min(event_datetime)::date FROM incidents')->fetchColumn();
+    if ($fechas) {
+        $ult = new DateTimeImmutable(end($fechas));
+        $contador['dias'] = (int)$ult->diff($hoy)->days;
+        $contador['ultimo'] = end($fechas);
+        $rec = $contador['dias'];
+        for ($i = 1; $i < count($fechas); $i++) {
+            $rec = max($rec, (int)(new DateTimeImmutable($fechas[$i - 1]))->diff(new DateTimeImmutable($fechas[$i]))->days);
+        }
+        if ($primero) $rec = max($rec, (int)(new DateTimeImmutable($primero))->diff(new DateTimeImmutable($fechas[0]))->days);
+        $contador['record'] = $rec;
+    } elseif ($primero) {
+        $contador['dias'] = (int)(new DateTimeImmutable($primero))->diff($hoy)->days;
+        $contador['desde_inicio'] = $primero;
+        $contador['record'] = $contador['dias'];
+    }
+
     return [
+        'contador' => $contador,
         'periodo'  => ['desde' => $months[0], 'hasta' => end($months), 'meses' => count($months), 'meses_con_hht' => $nMeses],
         'base_control' => $field === 'tri' ? 'TRI' : 'LTI',
         'totales'  => [

@@ -61,7 +61,7 @@ function addBaseLayers(map) {
   let pref = 'Satélite';
   try { pref = localStorage.getItem('sm_base') || pref; } catch (_) {}
   (layers[pref] || layers['Satélite']).addTo(map);
-  L.control.layers(layers, null, { position: 'topright', collapsed: false }).addTo(map);
+  L.control.layers(layers, null, { position: 'topright', collapsed: window.innerWidth < 992 }).addTo(map);
   map.on('baselayerchange', e => { try { localStorage.setItem('sm_base', e.name); } catch (_) {} });
 }
 

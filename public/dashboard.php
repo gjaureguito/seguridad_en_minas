@@ -9,10 +9,17 @@ page_head('Dashboard', ['<link rel="stylesheet" href="https://unpkg.com/leaflet@
 <body>
 <?php page_nav($user, 'dashboard.php'); ?>
 <div class="container-fluid py-3">
+  <div class="d-flex d-lg-none gap-2 mb-2">
+    <button class="btn btn-outline-primary flex-grow-1" data-bs-toggle="offcanvas" data-bs-target="#filtros"><i class="bi bi-funnel"></i> Filtros <span id="fCount" class="badge text-bg-warning ms-1 d-none"></span></button>
+    <button class="btn btn-outline-primary" onclick="document.getElementById('btnKML').click()" title="Google Earth"><i class="bi bi-globe-americas"></i></button>
+  </div>
   <div class="row g-3">
     <div class="col-12 col-lg-3">
+      <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="filtros" aria-labelledby="filtrosTit">
+      <div class="offcanvas-header d-lg-none"><h2 class="section-title m-0" id="filtrosTit">Filtros</h2><button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#filtros" aria-label="Cerrar"></button></div>
+      <div class="offcanvas-body d-block p-3 p-lg-0">
       <div class="cardish">
-        <div class="section-title">Filtros</div>
+        <div class="section-title d-none d-lg-block">Filtros</div>
         <div class="row g-2">
           <div class="col-6"><label class="form-label">Desde</label><input id="f_ini" type="date" class="form-control form-control-sm"></div>
           <div class="col-6"><label class="form-label">Hasta</label><input id="f_fin" type="date" class="form-control form-control-sm"></div>
@@ -30,21 +37,24 @@ page_head('Dashboard', ['<link rel="stylesheet" href="https://unpkg.com/leaflet@
         <div class="d-flex gap-2 mt-3">
           <button id="btnClear" class="btn btn-outline-secondary btn-sm">Limpiar</button>
           <button id="btnCSV" class="btn btn-outline-success btn-sm ms-auto"><i class="bi bi-filetype-csv"></i> CSV</button>
-          <button id="btnKML" class="btn btn-outline-primary btn-sm" title="Abrir en Google Earth"><i class="bi bi-globe-americas"></i> Google Earth (KML)</button>
+          <button id="btnKML" class="btn btn-outline-primary btn-sm" title="Abrir en Google Earth"><i class="bi bi-globe-americas"></i> Google Earth</button>
         </div>
+        <button class="btn btn-primary w-100 mt-3 d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#filtros">Ver <span id="fRes">0</span> registros</button>
       </div>
+      </div></div>
     </div>
 
     <div class="col-12 col-lg-9">
       <div class="row g-2 mb-2">
-        <?php foreach ([['k_total','Registros'],['k_at','Accidentes de trabajo'],['k_lti','Con baja'],['k_dias','Días perdidos'],['k_hipo','Alto potencial'],['k_den','Sin denunciar (ART)']] as [$id,$l]): ?>
-        <div class="col-6 col-md-4 col-xl-2"><div class="kpi"><div class="lbl"><?= $l ?></div><div class="val" id="<?= $id ?>">—</div></div></div>
+        <?php foreach ([['k_total','Registros','k-info'],['k_at','Accidentes de trabajo','k-acento'],['k_lti','Con baja','k-alerta'],['k_dias','Días perdidos','k-alerta'],['k_hipo','Alto potencial','k-acento'],['k_den','Sin denunciar a la ART','k-alerta']] as [$id,$l,$k]): ?>
+        <div class="col-4 col-md-4 col-xl-2"><div class="kpi <?= $k ?>"><div class="lbl"><?= $l ?></div><div class="val" id="<?= $id ?>">—</div></div></div>
         <?php endforeach; ?>
       </div>
-      <div id="map" class="cardish p-0 mb-2" style="height:44vh"></div>
+      <div id="map" class="cardish p-0 mb-2" style="height:clamp(280px,44vh,520px)"></div>
       <div class="cardish">
         <div class="d-flex justify-content-between mb-2"><div class="section-title m-0">Registros filtrados</div><div class="small-muted"><span id="cnt">0</span> filas</div></div>
-        <div class="table-responsive" style="max-height:40vh">
+        <div id="cards" class="d-md-none"></div>
+        <div class="table-responsive d-none d-md-block" style="max-height:48vh">
           <table class="table table-sm table-hover mb-0">
             <thead class="table-light position-sticky top-0"><tr>
               <th>#</th><th>Fecha</th><th>Título</th><th>Tipo</th><th>Consecuencia</th><th class="text-end">Días</th><th>Sev.</th><th>Potencial</th><th>Empresa</th><th>Estado</th><th></th></tr></thead>
@@ -109,6 +119,18 @@ function render() {
   });
 
   $('cnt').textContent = FILTERED.length;
+  $('fRes').textContent = FILTERED.length;
+  const nf = ['f_fin','f_tipo','f_consec','f_cat','f_sev','f_estado','f_pot','f_emp','f_q'].filter(id => $(id).value).length + ($('f_bbox').checked ? 1 : 0);
+  $('fCount').textContent = nf; $('fCount').classList.toggle('d-none', !nf);
+  $('cards').innerHTML = FILTERED.slice(0, 200).map(it => {
+    const lti = LTI.includes(it.consecuencia), den = needsDenuncia(it) && !it.art_denunciado;
+    return `<a href="index.php#edit=${it.id}" class="reg-card d-block text-reset text-decoration-none ${lti ? 'lti' : ''}">
+      <div class="d-flex justify-content-between gap-2"><span class="t">${esc(it.title)}</span><span class="small-muted text-nowrap">#${it.id}</span></div>
+      <div class="m">${esc(fmtDT(it.event_datetime))} · ${esc(it.company || 'Sin empresa')}</div>
+      <div class="mt-1"><span class="status-dot" style="background:${SEV_COLOR[it.severity_code]};border:1px solid #17212B"></span><span class="pill">${esc(META.enums.consecuencia[it.consecuencia])}${lti ? ' · ' + it.dias_perdidos + ' d' : ''}</span>
+        <span class="pill">${esc(META.enums.estado[it.estado])}</span>${den ? '<span class="badge text-bg-danger">Sin denuncia ART</span>' : ''}</div></a>`;
+  }).join('') + (FILTERED.length > 200 ? `<div class="small-muted text-center">Mostrando 200 de ${FILTERED.length}. Usá los filtros para acotar.</div>` : '')
+  || '<div class="small-muted p-3 text-center">Ningún registro coincide con los filtros.</div>';
   $('tbody').innerHTML = FILTERED.map(it => `<tr>
     <td>${it.id}</td><td class="text-nowrap">${esc(fmtDT(it.event_datetime))}</td><td>${esc(it.title)}</td>
     <td><span class="pill">${esc((META.enums.tipo_contingencia[it.tipo_contingencia] || '').split(' (')[0])}</span></td>
